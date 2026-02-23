@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Fahrzeugplaner DHL</title>
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="stylesheet" href="style.css?v=106">
+  <meta name="theme-color" content="#ffcc00">
+</head>
+<body>
+
+  <!-- Modal Elements outside any container for absolute top-level positioning -->
+  <div id="profileModal" class="modal">
+    <div class="modal-content">
+      <h3 style="color: #333; text-align: center;">Profil bearbeiten</h3>
+      <div class="input-group">
+        <label>Anzeigename:</label>
+        <input type="text" id="editName" placeholder="Dein Name">
+      </div>
+      <div class="input-group">
+        <label>Neue Email:</label>
+        <input type="email" id="editEmail" placeholder="beispiel@dhl.com">
+      </div>
+        <div class="input-group">
+          <label>Neues Passwort:</label>
+          <input type="password" id="editPassword" placeholder="Mind. 6 Zeichen">
+        </div>
+        <div id="profile-standort-section" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; display: none;">
+          <label>Eigenen Standort erstellen (Verwalter)</label>
+          <input type="text" id="createStandortInput" placeholder="Name deines Standorts" style="width: 100%; border: 1px solid #ddd; border-radius: 4px; padding: 8px; margin-top: 5px;">
+          <button id="createStandortBtn" class="auth-btn" style="margin-top: 10px; font-size: 14px;">Standort jetzt erstellen</button>
+        </div>
+        <button id="save-profile-btn" class="auth-btn">Speichern</button>
+      <button class="profile-home-btn" onclick="closeProfileModal()">Zurück zum Home</button>
+    </div>
+  </div>
+
+  <div id="selectionModal" class="modal">
+    <div class="modal-content">
+      <h3 id="modalTitle" style="color: #333; text-align: center;">Auswählen</h3>
+      <div id="optionsList" class="options-grid"></div>
+      <button class="cancel-btn" onclick="closeModal()">Abbrechen</button>
+    </div>
+  </div>
+
+  <div id="teamModal" class="modal">
+    <div class="modal-content">
+      <h3 style="color: #333; text-align: center;">Team verwalten</h3>
+      <div class="input-group">
+        <label>Mitarbeiter einladen (E-Mail):</label>
+        <input type="email" id="inviteEmail" placeholder="kollege@dhl.com">
+        <button onclick="inviteEmployee()" class="auth-btn" style="margin-top:5px;">Einladen</button>
+      </div>
+      <div id="teamList" style="margin-top:15px; max-height: 200px; overflow-y: auto;"></div>
+      <button class="cancel-btn" onclick="closeTeamModal()">Schließen</button>
+    </div>
+  </div>
+
+  <div id="invitesModal" class="modal">
+    <div class="modal-content">
+      <h3 style="color: #333; text-align: center;">Einladungen</h3>
+      <div id="incomingInvitesList" style="margin-top:15px; max-height: 250px; overflow-y: auto;"></div>
+      <button class="cancel-btn" onclick="closeInvitesModal()">Schließen</button>
+    </div>
+  </div>
+
+  <!-- Auth Screen -->
+  <div id="auth-container">
+    <h2 id="auth-title">Anmelden</h2>
+    <div id="login-form">
+      <div style="background: #fff8e1; border-left: 4px solid #ffcc00; padding: 10px; margin-bottom: 15px; font-size: 13px; color: #555;">
+        <strong>Hinweis:</strong> Neu hier? Schau dir nach der Anmeldung die <strong>Hilfe & Info</strong> unter dem Zahnrad-Symbol ⚙️ an, um die App optimal zu nutzen.
+      </div>
+      <div class="input-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="beispiel@dhl.com">
+      </div>
+      <div class="input-group">
+        <label for="password">Passwort</label>
+        <input type="password" id="password" placeholder="Passwort">
+      </div>
+      <button id="login-btn" class="auth-btn">Anmelden</button>
+      <button id="forgot-password-btn" class="auth-btn secondary" style="margin-top: 5px; font-size: 12px; background: transparent; border: none; color: #333; text-decoration: underline;">Passwort vergessen?</button>
+      <button id="show-register" class="auth-btn secondary">Konto erstellen</button>
+    </div>
+
+    <!-- Email Verification Modal (Hidden by default) -->
+    <div id="emailVerifyModal" class="modal">
+      <div class="modal-content">
+        <h3 style="color: #333; text-align: center;">E-Mail bestätigen</h3>
+        <p style="text-align: center; font-size: 14px; color: #666; margin-bottom: 20px;">
+          Ein Bestätigungslink wurde an deine E-Mail gesendet. Bitte klicke auf den Link in der E-Mail, um dein Konto freizuschalten.
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <button id="resend-verify-btn" class="auth-btn">Link erneut senden</button>
+          <button onclick="location.reload()" class="auth-btn secondary">Ich habe bestätigt (Neu laden)</button>
+          <button onclick="closeVerifyModal()" class="cancel-btn">Abbrechen</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="register-form" style="display:none;">
+      <div class="input-group">
+        <label for="reg-name">Dein Name</label>
+        <input type="text" id="reg-name" placeholder="Name">
+      </div>
+      <div class="input-group">
+        <label for="reg-location">Standort (nur für Tabellen-Ersteller)</label>
+        <input type="text" id="reg-location" placeholder="Standort Name">
+      </div>
+      <div class="input-group">
+        <label for="reg-email">Email</label>
+        <input type="email" id="reg-email" placeholder="beispiel@dhl.com">
+      </div>
+      <div class="input-group">
+        <label for="reg-password">Passwort</label>
+        <input type="password" id="reg-password" placeholder="Passwort">
+      </div>
+      <button id="register-btn" class="auth-btn">Registrieren</button>
+      <button id="show-login" class="auth-btn secondary">Zurück zum Login</button>
+    </div>
+    <div id="status-msg"></div>
+    <div class="credit">byErenBerber</div>
+  </div>
+
+  <!-- Dashboard Screen -->
+  <div id="dashboard-container" style="position: relative;">
+    <div id="gear-icon" class="settings-gear">⚙️</div>
+    <div id="news-icon" class="news-icon" style="position: absolute; top: 10px; right: 55px; font-size: 24px; cursor: pointer; user-select: none;">
+      📢
+      <div id="news-badge" class="badge" style="display: none; top: -5px; right: -5px;">0</div>
+    </div>
+    <div id="settings-menu" class="settings-menu">
+      <button id="dash-setup-btn" class="auth-btn secondary" style="margin-top: 0; display: none;">Listen verwalten</button>
+      <button id="dash-help-btn" class="auth-btn secondary" style="margin-top: 5px;">Hilfe & Info</button>
+      <button id="dash-profile-btn" class="auth-btn secondary" style="margin-top: 5px;">Profil bearbeiten</button>
+      <button id="dash-logout-btn" class="auth-btn secondary" style="margin-top: 5px;">Logout</button>
+      <button id="dash-del-btn" class="auth-btn secondary" style="margin-top: 5px; color: #d40000; border-color: #d40000;">Konto löschen</button>
+    </div>
+
+    <h2 id="dash-welcome">Willkommen</h2>
+    <p style="text-align: center; color: #666;">Wähle eine Option:</p>
+    
+    <button id="dash-create-btn" class="dash-btn">
+      Erstellen (für Zuständige)
+    </button>
+    
+    <button id="dash-join-btn" class="dash-btn">
+      Beitreten
+      <div id="invite-badge" class="badge">0</div>
+    </button>
+    
+    <div class="credit">byErenBerber</div>
+  </div>
+
+  <!-- App Screen -->
+  <div id="app-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 20px;">
+      <h2 id="display-location" style="font-size: 16px;">Fahrzeugplaner DHL</h2>
+      <div style="display: flex; gap: 5px;">
+        <button id="back-to-dash-btn" style="padding: 5px 10px; background: #333; color: #ffcc00; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">🏠 Dash</button>
+        <button id="manage-team-btn" onclick="openTeamModal()" style="display:none; padding: 5px 10px; background: #333; color: #ffcc00; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">👥 Team</button>
+        <button id="logout-btn" style="padding: 5px 10px; background: #333; color: #ffcc00; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">Logout</button>
+      </div>
+    </div>
+
+    <table id="autoTable">
+      <thead>
+        <tr>
+            <th>Tour</th>
+            <th>Fahrer</th>
+            <th>Kennzeichen</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <!-- Zeilen-Steuerung -->
+    <div class="row-controls">
+      <button id="add-row-btn" title="Zeile hinzufügen">＋</button>
+      <button id="remove-row-btn" title="Letzte Zeile entfernen">－</button>
+    </div>
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px 20px;">
+       <button id="del-acc-btn" onclick="deleteAccount()" style="background: transparent; border: none; color: #d40000; font-size: 10px; cursor: pointer;">Konto löschen</button>
+       <div class="credit" style="padding-right: 0; width: auto;">byErenBerber</div>
+    </div>
+  </div>
+
+  <div id="newsModal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+      <h3 style="color: #333; text-align: center;">Ankündigungen</h3>
+      <div id="newsContent" style="margin-top: 15px; max-height: 300px; overflow-y: auto; text-align: left; font-size: 14px; line-height: 1.5; border-bottom: 1px solid #eee; padding-bottom: 15px;">
+        Keine neuen Nachrichten.
+      </div>
+      
+      <div id="admin-news-panel" style="display: none; margin-top: 15px; padding-top: 15px;">
+        <h4 style="color: #d40000;">Neues Update senden (Admin)</h4>
+        <textarea id="adminNewsText" rows="4" style="width: 100%; border: 1px solid #ddd; border-radius: 4px; padding: 5px; margin-top: 5px;" placeholder="Was gibt es Neues?"></textarea>
+        <button id="send-news-btn" class="auth-btn" style="margin-top: 10px;">Nachricht senden</button>
+      </div>
+      
+      <button onclick="closeNewsModal()" class="auth-btn" style="margin-top: 20px;">Schließen</button>
+    </div>
+  </div>
+
+  <div id="listSetupModal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+      <h3 style="color: #333; text-align: center;">Listen verwalten</h3>
+      <p style="font-size: 12px; color: #666; text-align: center;">Gib die Einträge zeilenweise ein:</p>
+      
+      <div class="input-group">
+        <label>Touren:</label>
+        <textarea id="setupTouren" rows="4" style="width: 100%; border: 1px solid #ddd; border-radius: 4px; padding: 5px;"></textarea>
+      </div>
+      <div class="input-group" style="margin-top: 10px;">
+        <label>Fahrer:</label>
+        <textarea id="setupFahrer" rows="4" style="width: 100%; border: 1px solid #ddd; border-radius: 4px; padding: 5px;"></textarea>
+      </div>
+      <div class="input-group" style="margin-top: 10px;">
+        <label>Kennzeichen:</label>
+        <textarea id="setupKennzeichen" rows="4" style="width: 100%; border: 1px solid #ddd; border-radius: 4px; padding: 5px;"></textarea>
+      </div>
+      
+      <button id="save-lists-btn" class="auth-btn" style="margin-top: 15px;">Speichern</button>
+      <button onclick="closeListSetupModal()" class="cancel-btn">Schließen</button>
+    </div>
+  </div>
+
+  <div id="helpModal" class="modal">
+    <div class="modal-content" style="max-width: 600px; text-align: left;">
+      <h3 style="color: #333; text-align: center;">Hilfe & Anleitung</h3>
+      <div style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
+        <h4 style="color: #d40000;">1. Erste Schritte</h4>
+        <p style="font-size: 14px;">Erstelle ein Konto. Den Standortnamen (z.B. Dortmund) musst du nur angeben, wenn du eine eigene Tabelle verwalten möchtest. Als Ersteller bist du der <b>Administrator</b> und verwaltest die Listen.</p>
+        
+        <h4 style="color: #d40000; margin-top: 15px;">2. Listen verwalten</h4>
+        <p style="font-size: 14px;">Klicke auf das Zahnrad ⚙️ und dann auf "Listen verwalten". Dort kannst du Touren, Fahrer und Kennzeichen zeilenweise eingeben.</p>
+        
+        <h4 style="color: #d40000; margin-top: 15px;">3. Tabelle nutzen</h4>
+        <p style="font-size: 14px;">Klicke in der Tabelle einfach auf ein Feld. Es öffnet sich ein Fenster mit deiner zuvor erstellten Liste. Wähle einen Eintrag aus, um ihn einzufügen.</p>
+        
+        <h4 style="color: #d40000; margin-top: 15px;">4. Team einladen</h4>
+        <p style="font-size: 14px;">In der Tabelle findest du oben rechts den Button "Team". Dort kannst du Kollegen per E-Mail einladen, damit sie die Tabelle auch sehen können.</p>
+
+        <h4 style="color: #d40000; margin-top: 15px;">5. Einladung erhalten?</h4>
+        <p style="font-size: 14px;">Wenn du eingeladen wurdest, erscheint ein <b>rotes Ausrufezeichen (!)</b> am Megafon-Symbol 📢 oben rechts. Klicke darauf und wähle <b>"Annehmen"</b>. Erst danach kannst du auf dem Dashboard auf <b>"Beitreten"</b> klicken, um zur Tabelle zu gelangen.</p>
+
+        <h4 style="color: #d40000; margin-top: 15px;">6. Sicherheit & Datenschutz</h4>
+        <p style="font-size: 14px;">Diese App ist privat. Nur Personen mit einem Link und einem bestätigten Konto können Daten sehen. Deine Daten sind durch Firebase verschlüsselt und nur für dich und dein eingeladenes Team sichtbar. Fremde ohne Einladung haben keinen Zugriff auf deine Tabellen.</p>
+      </div>
+      <button onclick="closeHelpModal()" class="auth-btn" style="margin-top: 20px;">Verstanden</button>
+    </div>
+  </div>
+
+  <script src="script.js?v=106"></script>
+</body>
+</html>

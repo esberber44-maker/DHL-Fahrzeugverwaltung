@@ -1,0 +1,33 @@
+{
+  "name": "🚗 Auto Plan - Fahrzeugverwaltung",
+  "short_name": "Auto Plan",
+  "description": "Einfache mobile App zur Verwaltung von Fahrzeugen mit Cloud-Synchronisierung",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffcc00",
+  "theme_color": "#ffcc00",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["productivity"],
+  "orientation": "portrait"
+}
