@@ -103,6 +103,9 @@ td:hover {
 .options-grid {
   display: grid;
   gap: 10px;
+  max-height:400px;
+  overflow-y:auto;
+  padding-right: 8px
 }
 
 .option-btn {
